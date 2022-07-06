@@ -42,10 +42,20 @@ const EXAMPLE_SEARCH_RESULTS = {
 //
 //You can test this function by passing it one of the above array items
 //(e.g., EXAMPLE_SEARCH_RESULTS.results[0]).
-
-
-
-
+function renderTrack(trackObj) {
+  let parentEle = document.querySelector('#records')
+  let newEle = document.createElement('img');
+  newEle.src = trackObj.artworkUrl;
+  newEle.alt = trackObj.nameOfTrac;
+  newEle.title = trackObj.trackName
+parentEle.appendChild(newRecord);
+newEle.addEventListener("click", function(){
+  let track = trackObj.previewUrl;
+  let img = trackObj.artworkUrl100;
+  playTrackPreview(track, img)
+})
+}
+renderTrack(EXAMPLE_SEARCH_RESULTS.results[0])//test
 //Define a function `renderSearchResults()` that takes in an object with a
 //`results` property containing an array of music tracks; the same format as
 //the above `EXAMPLE_SEARCH_RESULTS` variable.
@@ -58,8 +68,16 @@ const EXAMPLE_SEARCH_RESULTS = {
 //(2) Modify the above `renderSearchResults()` function so that if the `results`
 // array is empty, you instead call the `renderError()` function and pass
 // it an new Error object: `new Error("No results found")`
-
-
+function renderSearchResults(results){
+  //document.querySelector("input").innerHTML="";
+  let trackArr = obj.results;
+  if(trackArr.length == 0){
+    renderError(new Error("No results found"))
+  }
+  trackArr.forEach(function(item){
+    renderTrack(item)
+  })
+}
 
 //Now it's the time to practice using `fetch()`! 
 //Define a function `fetchTrackList()` that takes in a "search term" string as a
@@ -75,8 +93,22 @@ const EXAMPLE_SEARCH_RESULTS = {
 //IMPORTANT: Your `fetchTrackList()` method must also _return_ the Promise
 //returned by the end of the `.then()` chain! This is so the method itself will
 //be asynchronous, and can be further chained and utilized (e.g., by the tester).
-
-
+function fetchTrackList(searchStr){
+  return fetch ("https://itunes.apple.com/search?limit=25&term={searchTerm}=" + searchStr)
+      .then(function(response){
+        return response.json();
+      }).then(function(jsonData){
+      renderSearchResults(jsonData)
+    })
+    .catch(function(err){
+      console.alert(err)
+    })
+    .then(function(){
+      togglerSpinner
+    })
+    
+}
+//fetchTrackList("SZA")
 
 //You can test this function by calling the method and passing it the name of
 //your favorite band (you CANNOT test it with the search button yet!)
@@ -87,12 +119,22 @@ const EXAMPLE_SEARCH_RESULTS = {
 //user-entered `#searchQuery` value. Use the `preventDefault()` function to keep
 //the form from being submitted as usual (and navigating to a different page).
 
-
+document.querySelector("button").addEventListener("click", function(event){
+  event.preventDefault();
+  let userVal = document.querySelector("#searchQuery");
+  fetchTrackList(userVal)
+})
 //Next, add some error handling to the page. Define a function `renderError()`
 //that takes in an "Error object" and displays that object's `message` property
 //on the page. Display this by creating a `<p class="alert alert-danger">` and
 //placing that alert inside the `#records` element.
-
+function renderError(errObj){
+  let newEle = document.createElement("p");
+  let msg = errObj.message;
+  newEle.innerHTML = msg;
+  newEle.classList.add('alert alert-danger');
+  document.querySelector("#records").appendChild(newEle)
+}
 
 //Add the error handing to your program in two ways:
 //(1) Add a `.catch()` callback to the AJAX call in `fetchTrackList()` that
@@ -110,7 +152,12 @@ const EXAMPLE_SEARCH_RESULTS = {
 //so that it is displayed if currently hidden, or hidden if currently displayed.
 //Use the `classList.toggle()` method (or `.toggleClass()` with jQuery) to
 //toggle the presence of the `d-none` class.
-//
+
+function togglerSpinner(){
+  let faSpinner = document.querySelector(".fa-spinner")
+  faSpinner.classList.toggle('d-none')
+}
+
 //Modify the `fetchTrackList()` function once again so that you toggle the
 //spinner (show it) BEFORE you send the AJAX request, and toggle it back off
 //after the ENTIRE request is completed (including after any error catching---
